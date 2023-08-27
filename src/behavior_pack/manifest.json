@@ -1,0 +1,28 @@
+{
+  "format_version": 2,
+  "header": {
+    "description": "pack.description",
+    "name": "pack.name",
+    "uuid": "59476ad7-cbe9-43a9-9e89-83134e8f3afe",
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 20, 0]
+  },
+  "modules": [
+    {
+      "type": "data",
+      "uuid": "d7a55ec9-615c-4371-a86d-84540886f218",
+      "version": [1, 0, 0]
+    }
+  ],
+  "dependencies": [
+    {
+      "uuid": "909db4d9-4592-4714-8ad3-fd973a328854",
+      "version": [1, 0, 0]
+    }
+  ],
+  "metadata": {
+    "authors": ["Lete114"],
+    "license": "GPL-2.0",
+    "url": "https://github.com/mcbe-mods/More-Falling-Leaves"
+  }
+}
