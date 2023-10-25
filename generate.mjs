@@ -9,7 +9,6 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const behaviorPackPath = join(__dirname, 'src/behavior_pack')
 const functionPath = join(behaviorPackPath, 'functions')
 const functionParticlesPath = join(functionPath, 'particles')
-const mainPath = join(functionPath, 'main.mcfunction')
 const tickPath = join(functionPath, 'tick.json')
 
 removeSync(functionPath)
@@ -23,8 +22,7 @@ const locations = getRadiusRange({ x: 0, y: 0, z: 0 }, 10)
   .filter(({ x, z }) => isOdd(x) && isOdd(z))
 
 const interval = [1, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500]
-const leaves = ['mangrove_leaves', 'leaves', 'leaves2', 'azalea_leaves', 'azalea_leaves_flowered']
-const intervalLeaves = []
+const leaves = ['leaves', 'leaves2', 'azalea_leaves', 'azalea_leaves_flowered', 'mangrove_leaves', 'cherry_leaves']
 
 for (const leave of leaves) {
   const commands = locations
@@ -32,25 +30,32 @@ for (const leave of leaves) {
       const random = getRandomProbability(50) ? 0.1 : 0
       const subCommand = `if block  ~${x} ~${y + -1} ~${z} air`
       const runCommand = `run particle mfl:oak  ~${x + -0.5} ~${y + random} ~${z + -0.5}`
-      return `execute as @a at @s if block ~${x} ~${y} ~${z} ${leave} ${subCommand} ${runCommand}`
+      return `execute at @s if block ~${x} ~${y} ~${z} ${leave} ${subCommand} ${runCommand}`
     })
     .join('\n')
 
-  const _interval = interval.map((i) => `execute as @a[scores={time=${i}}] run function particles/${leave}`).join('\n')
-  intervalLeaves.push(_interval)
+  const intervals = interval
+    .map((i) => `execute as @a[scores={More_Falling_Leaves=${i}}] run function particles/${leave}`)
+    .join('\n')
 
+  // -------- main run particle
   const path = join(functionParticlesPath, `${leave}.mcfunction`)
   writeFile(path, commands, () => {})
+
+  // -------- main run call particle
+  const mainPath = join(functionPath, `run_${leave}.mcfunction`)
+  writeFile(mainPath, intervals, () => {})
 }
 
+// -------- main run scoreboard
 const mainContext = `
-scoreboard objectives add time dummy
-scoreboard players add @a time 1
-
-${intervalLeaves.map((i) => i).join('\n\n')}
-
-execute as @a[scores={time=500..}] run scoreboard players set @a time 0`
+scoreboard objectives add More_Falling_Leaves dummy
+scoreboard players add @a More_Falling_Leaves 1
+execute as @a[scores={More_Falling_Leaves=500..}] run scoreboard players set @a More_Falling_Leaves 0`
+const mainPath = join(functionPath, 'run_main.mcfunction')
 writeFile(mainPath, mainContext, () => {})
 
-const tickContext = JSON.stringify({ values: ['main'] })
+// -------- main run particles
+const runs = leaves.map((item) => `run_${item}`)
+const tickContext = JSON.stringify({ values: ['run_main', ...runs] })
 writeFile(tickPath, tickContext, () => {})
